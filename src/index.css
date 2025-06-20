@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-white border-opacity-20;
+  }
+  body {
+    @apply bg-cosmic-900 text-cosmic-50;
+  }
+  
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-cosmic-800;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-mystical-500 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-mystical-400;
+  }
+}
+
+@layer components {
+  .glass-effect {
+    @apply bg-white/10 backdrop-blur-sm border border-white/20;
+  }
+  
+  .cosmic-gradient {
+    background: linear-gradient(135deg, theme('colors.cosmic.900'), theme('colors.mystical.900'));
+  }
+  
+  .glow-effect {
+    box-shadow: 0 0 20px theme('colors.mystical.500/30');
+  }
+}
+
+/* Custom animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Performance optimizations */
+* {
+  will-change: auto;
+}
+
+.animate-float {
+  will-change: transform;
+}
+
+.animate-pulse-slow {
+  will-change: opacity;
+}
+
+/* Loading states */
+.loading-skeleton {
+  @apply bg-gradient-to-r from-cosmic-800 via-cosmic-700 to-cosmic-800 bg-[length:200px_100%] animate-pulse;
+}
