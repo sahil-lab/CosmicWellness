@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { HoroscopeReading, ZodiacSign } from '../types';
 import { getHoroscope } from '../services/aiService';
 import { zodiacSigns } from '../data/zodiacSigns';
-import { Star, Heart, Palette, Hash, Calendar, Sparkles, TrendingUp, RefreshCw, Clock } from 'lucide-react';
+import { Star, Heart, Palette, Hash, Calendar, Sparkles, TrendingUp, RefreshCw, Clock, Briefcase, Coins, Activity } from 'lucide-react';
 
 export const EnhancedAstrologySection: React.FC = () => {
   const [horoscopes, setHoroscopes] = useState<Record<string, HoroscopeReading>>({});
@@ -17,9 +17,15 @@ export const EnhancedAstrologySection: React.FC = () => {
     const checkForDailyUpdate = () => {
       const now = new Date();
       const lastUpdate = new Date(localStorage.getItem('lastHoroscopeUpdate') || '');
-      
+
+      console.log('🔄 Checking for daily update:', {
+        now: now.toLocaleString(),
+        lastUpdate: lastUpdate.toLocaleString() || 'Never'
+      });
+
       // Check if it's a new day
       if (now.toDateString() !== lastUpdate.toDateString()) {
+        console.log('📅 New day detected, clearing cache');
         // Clear cached horoscopes for fresh AI generation
         setHoroscopes({});
         localStorage.setItem('lastHoroscopeUpdate', now.toISOString());
@@ -28,46 +34,67 @@ export const EnhancedAstrologySection: React.FC = () => {
     };
 
     checkForDailyUpdate();
-    
+
     // Check every hour for daily updates
     const interval = setInterval(checkForDailyUpdate, 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
   const handleGetHoroscope = async (sign: ZodiacSign) => {
+    console.log('🔮 Getting horoscope for:', sign.name);
     setSelectedSign(sign);
-    
+
     // Check if we already have today's horoscope for this sign
     if (horoscopes[sign.id] && !loading[sign.id]) {
+      console.log('📋 Using cached horoscope for:', sign.name);
       return;
     }
 
     setLoading(prev => ({ ...prev, [sign.id]: true }));
-    
+
     try {
+      console.log('🌟 Requesting fresh horoscope for:', sign.name);
       const reading = await getHoroscope(sign.name);
+      console.log('✅ Received horoscope for:', sign.name, {
+        readingCount: reading.readings.length,
+        compatibility: reading.compatibility
+      });
       setHoroscopes(prev => ({ ...prev, [sign.id]: reading }));
     } catch (error) {
-      console.error('Error getting horoscope:', error);
+      console.error('❌ Error getting horoscope:', error);
     } finally {
       setLoading(prev => ({ ...prev, [sign.id]: false }));
     }
   };
 
   const refreshHoroscope = async (sign: ZodiacSign) => {
+    console.log('🔄 Refreshing horoscope for:', sign.name);
     setLoading(prev => ({ ...prev, [sign.id]: true }));
-    
+
     try {
       // Force fresh AI generation by clearing cache
       const reading = await getHoroscope(sign.name);
+      console.log('✨ Fresh horoscope received for:', sign.name);
       setHoroscopes(prev => ({ ...prev, [sign.id]: reading }));
       setLastUpdated(new Date());
     } catch (error) {
-      console.error('Error refreshing horoscope:', error);
+      console.error('❌ Error refreshing horoscope:', error);
     } finally {
       setLoading(prev => ({ ...prev, [sign.id]: false }));
     }
   };
+
+  // Log state changes
+  useEffect(() => {
+    if (selectedSign) {
+      console.log('📊 State Update:', {
+        selectedSign: selectedSign.name,
+        activeDay,
+        hasHoroscope: !!horoscopes[selectedSign.id],
+        isLoading: loading[selectedSign.id]
+      });
+    }
+  }, [selectedSign, activeDay, horoscopes, loading]);
 
   const getElementColor = (element: string) => {
     switch (element.toLowerCase()) {
@@ -139,14 +166,14 @@ export const EnhancedAstrologySection: React.FC = () => {
                     <div className="animate-spin w-6 h-6 border-2 border-mystical-400 border-t-transparent rounded-full"></div>
                   </div>
                 )}
-                
+
                 <div className="text-3xl mb-2">{sign.symbol}</div>
                 <h4 className="text-white font-semibold text-sm mb-1">{sign.name}</h4>
                 <p className="text-cosmic-300 text-xs mb-2">{sign.dates}</p>
                 <div className={`inline-block px-2 py-1 rounded-full text-xs ${getElementColor(sign.element)}`}>
                   {sign.element}
                 </div>
-                
+
                 {horoscopes[sign.id] && (
                   <div className="absolute top-2 right-2">
                     <div className="w-2 h-2 bg-green-400 rounded-full"></div>
@@ -224,11 +251,10 @@ export const EnhancedAstrologySection: React.FC = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setActiveDay(reading.day)}
-                      className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                        activeDay === reading.day
-                          ? 'bg-mystical-500 text-white'
-                          : 'bg-white/10 text-cosmic-200 hover:bg-white/20'
-                      }`}
+                      className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${activeDay === reading.day
+                        ? 'bg-mystical-500 text-white'
+                        : 'bg-white/10 text-cosmic-200 hover:bg-white/20'
+                        }`}
                     >
                       {getDayLabel(reading.day)}
                     </motion.button>
@@ -275,7 +301,7 @@ export const EnhancedAstrologySection: React.FC = () => {
                               </div>
                               <p className="text-cosmic-200 text-sm">{reading.luckyColor}</p>
                             </div>
-                            
+
                             <div className="bg-white/5 rounded-lg p-3">
                               <div className="flex items-center gap-2 mb-1">
                                 <Hash className="w-4 h-4 text-golden-400" />
@@ -293,6 +319,53 @@ export const EnhancedAstrologySection: React.FC = () => {
                             <p className="text-cosmic-200 text-sm leading-relaxed">
                               {reading.advice}
                             </p>
+                          </div>
+
+                          {/* New Sections */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Love Section */}
+                            <div className="bg-white/5 rounded-lg p-4">
+                              <h5 className="text-white font-semibold mb-2 flex items-center gap-2">
+                                <Heart className="w-4 h-4 text-pink-400" />
+                                Love & Relationships
+                              </h5>
+                              <p className="text-cosmic-200 text-sm leading-relaxed">
+                                {reading.love}
+                              </p>
+                            </div>
+
+                            {/* Career Section */}
+                            <div className="bg-white/5 rounded-lg p-4">
+                              <h5 className="text-white font-semibold mb-2 flex items-center gap-2">
+                                <Briefcase className="w-4 h-4 text-blue-400" />
+                                Career & Work
+                              </h5>
+                              <p className="text-cosmic-200 text-sm leading-relaxed">
+                                {reading.career}
+                              </p>
+                            </div>
+
+                            {/* Money Section */}
+                            <div className="bg-white/5 rounded-lg p-4">
+                              <h5 className="text-white font-semibold mb-2 flex items-center gap-2">
+                                <Coins className="w-4 h-4 text-yellow-400" />
+                                Money & Finance
+                              </h5>
+                              <p className="text-cosmic-200 text-sm leading-relaxed">
+                                {reading.money}
+                              </p>
+                            </div>
+
+                            {/* Health Section */}
+                            <div className="bg-white/5 rounded-lg p-4">
+                              <h5 className="text-white font-semibold mb-2 flex items-center gap-2">
+                                <Activity className="w-4 h-4 text-red-400" />
+                                Health & Wellness
+                              </h5>
+                              <p className="text-cosmic-200 text-sm leading-relaxed">
+                                {reading.health}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </motion.div>

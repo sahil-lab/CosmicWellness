@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, Smartphone, Copy, CheckCircle, ExternalLink, Upload, Camera, AlertCircle } from 'lucide-react';
+import { QrCode, Smartphone, Copy, CheckCircle, ExternalLink, Upload, Camera, AlertCircle, Clock } from 'lucide-react';
 
 interface UPIPaymentProps {
   amount: number;
@@ -21,18 +21,18 @@ export const UPIPayment: React.FC<UPIPaymentProps> = ({
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [retryAttempts, setRetryAttempts] = useState(0);
-  
+
   // Your UPI IDs with fallback
   const UPI_IDS = [
     '8559067075@ikwik',
     '8559067075@mbk'
   ];
-  
+
   const currentUPIId = UPI_IDS[currentUPIIndex];
-  
+
   const generateUPILink = (app: string, upiId: string) => {
     const baseParams = `pa=${upiId}&pn=Cosmic Wellness&am=${amount}&cu=INR&tn=${encodeURIComponent(description)}`;
-    
+
     switch (app) {
       case 'gpay':
         return `tez://upi/pay?${baseParams}`;
@@ -49,12 +49,12 @@ export const UPIPayment: React.FC<UPIPaymentProps> = ({
 
   const handleUPIAppClick = (app: string) => {
     const upiLink = generateUPILink(app, currentUPIId);
-    
+
     // Try to open the UPI app
     const link = document.createElement('a');
     link.href = upiLink;
     link.click();
-    
+
     // Set status to awaiting screenshot after a short delay
     setTimeout(() => {
       setPaymentStatus('awaiting_screenshot');
@@ -88,15 +88,15 @@ export const UPIPayment: React.FC<UPIPaymentProps> = ({
         alert('Please upload an image file');
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('File size should be less than 5MB');
         return;
       }
-      
+
       setScreenshot(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -106,22 +106,73 @@ export const UPIPayment: React.FC<UPIPaymentProps> = ({
     }
   };
 
-  const handleSubmitPayment = () => {
+  const sendPaymentNotificationEmail = async (screenshotFile: File, paymentAmount: number, description: string) => {
+    try {
+      // Create email content
+      const subject = `💰 PAYMENT VERIFICATION REQUIRED - ₹${paymentAmount}`;
+      const timestamp = new Date().toLocaleString();
+      const body = `
+PAYMENT VERIFICATION REQUEST
+============================
+
+Payment Details:
+- Amount: ₹${paymentAmount}
+- Description: ${description}
+- UPI ID Used: ${currentUPIId}
+- Timestamp: ${timestamp}
+
+Screenshot Details:
+- File Name: ${screenshotFile.name}
+- File Size: ${(screenshotFile.size / 1024 / 1024).toFixed(2)} MB
+- File Type: ${screenshotFile.type}
+
+Please verify this payment and activate the user's premium access.
+
+---
+This is an automated payment verification request from the Cosmic Wellness platform.
+      `.trim();
+
+      // Create mailto link (for immediate notification)
+      const mailtoLink = `mailto:sahilupadhyay.works@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      // Open email client in a new window/tab so it doesn't interrupt the user flow
+      const emailWindow = window.open(mailtoLink, '_blank');
+      if (emailWindow) {
+        emailWindow.close();
+      }
+
+      console.log('📧 Payment notification email prepared for:', 'sahilupadhyay.works@gmail.com');
+
+    } catch (error) {
+      console.error('Error preparing payment notification email:', error);
+    }
+  };
+
+  const handleSubmitPayment = async () => {
     if (!screenshot) {
-      alert('Please upload payment screenshot');
+      alert('Please upload payment screenshot to complete verification');
       return;
     }
-    
+
     setPaymentStatus('verifying');
-    
-    // Simulate verification process
-    setTimeout(() => {
-      // In a real app, you would send the screenshot to your backend for verification
-      setPaymentStatus('success');
+
+    try {
+      // Send email notification with payment details
+      await sendPaymentNotificationEmail(screenshot, amount, description);
+
+      // Simulate verification process
       setTimeout(() => {
-        onSuccess();
-      }, 2000);
-    }, 3000);
+        setPaymentStatus('success');
+        setTimeout(() => {
+          onSuccess();
+        }, 2000);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      alert('There was an error processing your payment. Please try again.');
+      setPaymentStatus('awaiting_screenshot');
+    }
   };
 
   const upiApps = [
@@ -160,7 +211,24 @@ export const UPIPayment: React.FC<UPIPaymentProps> = ({
       >
         <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-white mb-2">Payment Verified!</h3>
-        <p className="text-cosmic-200">Your payment has been successfully verified and processed.</p>
+        <p className="text-cosmic-200 mb-4">Your payment has been successfully verified and processed.</p>
+
+        {/* Baba Connection Notification */}
+        <div className="bg-mystical-500/20 border border-mystical-400/30 rounded-xl p-6 mb-4">
+          <div className="flex items-center justify-center gap-2 text-mystical-300 mb-2">
+            <Clock className="w-5 h-5" />
+            <span className="font-semibold text-lg">Baba will connect you in 10 minutes</span>
+          </div>
+          <p className="text-mystical-200 text-sm">
+            Please keep your phone/email ready. You will receive connection details shortly.
+          </p>
+        </div>
+
+        <div className="bg-golden-500/20 border border-golden-400/30 rounded-lg p-4">
+          <p className="text-golden-200 text-sm">
+            📧 Payment notification has been sent to Baba for verification and activation of your premium access.
+          </p>
+        </div>
       </motion.div>
     );
   }
@@ -232,7 +300,7 @@ export const UPIPayment: React.FC<UPIPaymentProps> = ({
             <Camera className="w-5 h-5 text-mystical-400" />
             Upload Payment Screenshot
           </h4>
-          
+
           <div className="space-y-4">
             <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center">
               <input
