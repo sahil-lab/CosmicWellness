@@ -4,11 +4,27 @@ import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getPujaRecommendations } from '../services/aiService';
 import { PujaRequest, PujaRecommendation } from '../types';
-import VideoPlayer from './VideoPlayer';
+// Simple video player for puja videos
+const SimpleVideoPlayer: React.FC<{ videoId: string }> = ({ videoId }) => {
+    return (
+        <div className="aspect-video rounded-lg overflow-hidden">
+            <iframe
+                src={`https://www.youtube.com/embed/${videoId}`}
+                title="Puja Video Guide"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+            />
+        </div>
+    );
+};
 
 interface BookPanditSectionProps {
     user: User | null;
 }
+
+
 
 const BookPanditSection: React.FC<BookPanditSectionProps> = ({ user }) => {
     const [pujaRequest, setPujaRequest] = useState<PujaRequest>({
@@ -338,7 +354,7 @@ const BookPanditSection: React.FC<BookPanditSectionProps> = ({ user }) => {
                                     🌟 Spiritual Benefits
                                 </h4>
                                 <div className="grid md:grid-cols-2 gap-3">
-                                    {recommendation.benefits.map((benefit, index) => (
+                                    {recommendation.benefits.map((benefit: string, index: number) => (
                                         <div key={index} className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
                                             <span className="text-orange-600">✨</span>
                                             <span className="text-orange-700">{benefit}</span>
@@ -353,7 +369,7 @@ const BookPanditSection: React.FC<BookPanditSectionProps> = ({ user }) => {
                                     🛍️ Essential Puja Items
                                 </h4>
                                 <div className="grid md:grid-cols-2 gap-4">
-                                    {recommendation.essentialItems.map((item, index) => (
+                                    {recommendation.essentialItems.map((item: PujaRecommendation['essentialItems'][0], index: number) => (
                                         <div key={index} className="border border-orange-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                                             <div className="flex justify-between items-start mb-2">
                                                 <h5 className="font-semibold text-orange-800">{item.name}</h5>
@@ -379,7 +395,7 @@ const BookPanditSection: React.FC<BookPanditSectionProps> = ({ user }) => {
                                     📋 Puja Procedures
                                 </h4>
                                 <div className="space-y-4">
-                                    {recommendation.procedures.map((procedure, index) => (
+                                    {recommendation.procedures.map((procedure: PujaRecommendation['procedures'][0], index: number) => (
                                         <div key={index} className="border-l-4 border-orange-500 pl-6 py-3">
                                             <div className="flex items-center gap-3 mb-2">
                                                 <span className="bg-orange-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm">
@@ -410,11 +426,11 @@ const BookPanditSection: React.FC<BookPanditSectionProps> = ({ user }) => {
                                         📺 Video Guidance
                                     </h4>
                                     <div className="grid md:grid-cols-2 gap-6">
-                                        {recommendation.videos.map((video, index) => (
+                                        {recommendation.videos.map((video: PujaRecommendation['videos'][0], index: number) => (
                                             <div key={index} className="border border-orange-200 rounded-lg p-4">
                                                 <h5 className="font-semibold text-orange-800 mb-2">{video.title}</h5>
                                                 <p className="text-orange-600 text-sm mb-3">{video.description}</p>
-                                                <VideoPlayer videoId={video.videoId} />
+                                                <SimpleVideoPlayer videoId={video.videoId} />
                                             </div>
                                         ))}
                                     </div>
@@ -430,7 +446,7 @@ const BookPanditSection: React.FC<BookPanditSectionProps> = ({ user }) => {
                                     <div>
                                         <h5 className="font-semibold text-orange-700 mb-2">Specialization Needed:</h5>
                                         <ul className="space-y-1">
-                                            {recommendation.panditRequirements.specialization.map((spec, index) => (
+                                            {recommendation.panditRequirements.specialization.map((spec: string, index: number) => (
                                                 <li key={index} className="text-orange-600 flex items-center gap-2">
                                                     <span>•</span> {spec}
                                                 </li>
@@ -440,7 +456,7 @@ const BookPanditSection: React.FC<BookPanditSectionProps> = ({ user }) => {
                                     <div>
                                         <h5 className="font-semibold text-orange-700 mb-2">Languages:</h5>
                                         <div className="flex flex-wrap gap-2">
-                                            {recommendation.panditRequirements.languages.map((lang, index) => (
+                                            {recommendation.panditRequirements.languages.map((lang: string, index: number) => (
                                                 <span key={index} className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm">
                                                     {lang}
                                                 </span>
@@ -464,7 +480,7 @@ const BookPanditSection: React.FC<BookPanditSectionProps> = ({ user }) => {
                                     📝 Preparation Checklist
                                 </h4>
                                 <div className="space-y-3">
-                                    {recommendation.preparation.map((step, index) => (
+                                    {recommendation.preparation.map((step: string, index: number) => (
                                         <div key={index} className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
                                             <input type="checkbox" className="w-5 h-5 text-orange-600" />
                                             <span className="text-orange-700">{step}</span>

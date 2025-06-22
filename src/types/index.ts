@@ -370,3 +370,47 @@ export interface DietRecommendation {
     notes: string;
   };
 }
+
+export interface PujaRequest {
+  pujaType: string;
+  occasion: string;
+  deity: string;
+  location: string;
+  participants: number;
+  budget: string;
+  specialRequirements: string;
+  description: string;
+}
+
+export interface PujaRecommendation {
+  pujaName: string;
+  description: string;
+  duration: string;
+  deity: string;
+  auspiciousTime: string;
+  benefits: string[];
+  essentialItems: {
+    name: string;
+    purpose: string;
+    price: string;
+    amazonLink: string;
+  }[];
+  procedures: {
+    step: number;
+    action: string;
+    items: string[];
+    mantra?: string;
+  }[];
+  videos: {
+    title: string;
+    description: string;
+    videoId: string;
+  }[];
+  panditRequirements: {
+    specialization: string[];
+    languages: string[];
+    experience: string;
+    estimatedCost: string;
+  };
+  preparation: string[];
+}

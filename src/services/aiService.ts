@@ -1,5 +1,5 @@
 import openai from '../config/openai';
-import { VideoRecommendation, HoroscopeReading, OshoQuote, DailyReading, AngelGuidance, AngelGuidanceRequest, HandReading, PalmReadingAnalysis, KundliAnalysis, DietRecommendation, HealthProfile } from '../types';
+import { VideoRecommendation, HoroscopeReading, OshoQuote, DailyReading, AngelGuidance, AngelGuidanceRequest, HandReading, PalmReadingAnalysis, KundliAnalysis, DietRecommendation, HealthProfile, PujaRequest, PujaRecommendation } from '../types';
 import axios from 'axios';
 
 const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
@@ -1539,5 +1539,149 @@ const generateFallbackDietRecommendation = async (healthProfile: HealthProfile):
       sleep: '10:00-10:30 PM',
       notes: 'Drink warm water upon waking. Eat meals mindfully. Avoid eating 2-3 hours before bed. Stay hydrated throughout the day.'
     }
+  };
+};
+
+export const getPujaRecommendations = async (request: PujaRequest): Promise<PujaRecommendation> => {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert in Hindu religious ceremonies, rituals, and traditions. Provide detailed puja recommendations including procedures, essential items, spiritual benefits, and pandit requirements. Format your response as valid JSON."
+        },
+        {
+          role: "user",
+          content: `Please provide detailed puja recommendations for:
+          - Puja Type: ${request.pujaType}
+          - Deity: ${request.deity}
+          - Occasion: ${request.occasion}
+          - Location: ${request.location}
+          - Participants: ${request.participants}
+          - Budget: ${request.budget}
+          - Special Requirements: ${request.specialRequirements}
+          - Description: ${request.description}
+          
+          Format as JSON with the following structure:
+          {
+            "pujaName": "string",
+            "description": "string",
+            "duration": "string",
+            "deity": "string",
+            "auspiciousTime": "string",
+            "benefits": ["string"],
+            "essentialItems": [{"name": "string", "purpose": "string", "price": "string", "amazonLink": "string"}],
+            "procedures": [{"step": number, "action": "string", "items": ["string"], "mantra": "string"}],
+            "videos": [{"title": "string", "description": "string", "videoId": "string"}],
+            "panditRequirements": {
+              "specialization": ["string"],
+              "languages": ["string"],
+              "experience": "string",
+              "estimatedCost": "string"
+            },
+            "preparation": ["string"]
+          }`
+        }
+      ],
+      temperature: 0.7,
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) throw new Error('No response from AI');
+
+    try {
+      const jsonContent = content.replace(/```json\n|\n```/g, '').trim();
+      return JSON.parse(jsonContent);
+    } catch (parseError) {
+      console.error('Failed to parse puja recommendations JSON:', parseError);
+      return generateFallbackPujaRecommendation(request);
+    }
+  } catch (error) {
+    console.error('Error getting puja recommendations:', error);
+    return generateFallbackPujaRecommendation(request);
+  }
+};
+
+const generateFallbackPujaRecommendation = (request: PujaRequest): PujaRecommendation => {
+  return {
+    pujaName: `${request.deity} Puja`,
+    description: `A traditional and spiritually enriching puja dedicated to ${request.deity} for ${request.occasion || 'general blessings'}`,
+    duration: "2-3 hours",
+    deity: request.deity,
+    auspiciousTime: "Early morning (6:00 AM - 8:00 AM) or evening (6:00 PM - 8:00 PM)",
+    benefits: [
+      "Spiritual purification and cleansing",
+      "Divine blessings and protection",
+      "Peace and harmony in the home",
+      "Removal of obstacles and negative energies",
+      "Increased prosperity and well-being"
+    ],
+    essentialItems: [
+      {
+        name: "Coconut",
+        purpose: "Offering to the deity",
+        price: "$2-3",
+        amazonLink: "https://amazon.com/search?k=fresh+coconut"
+      },
+      {
+        name: "Incense Sticks",
+        purpose: "Creating sacred atmosphere",
+        price: "$5-10",
+        amazonLink: "https://amazon.com/search?k=incense+sticks"
+      },
+      {
+        name: "Flowers",
+        purpose: "Worship and decoration",
+        price: "$10-20",
+        amazonLink: "https://amazon.com/search?k=worship+flowers"
+      },
+      {
+        name: "Diya/Oil Lamps",
+        purpose: "Light offering",
+        price: "$8-15",
+        amazonLink: "https://amazon.com/search?k=diya+oil+lamps"
+      }
+    ],
+    procedures: [
+      {
+        step: 1,
+        action: "Preparation and purification",
+        items: ["Water", "Clean cloth", "Sacred thread"],
+        mantra: "Om Gan Ganapataye Namah"
+      },
+      {
+        step: 2,
+        action: "Invocation of the deity",
+        items: ["Flowers", "Incense", "Bell"],
+        mantra: "Om Namah Shivaya"
+      },
+      {
+        step: 3,
+        action: "Main worship and offerings",
+        items: ["Coconut", "Fruits", "Sweets"],
+        mantra: "Om Jai Jagdish Hare"
+      }
+    ],
+    videos: [
+      {
+        title: "Traditional Puja Procedures",
+        description: "Step-by-step guide to performing the puja",
+        videoId: "dQw4w9WgXcQ"
+      }
+    ],
+    panditRequirements: {
+      specialization: ["Vedic rituals", "Sanskrit mantras", "Traditional ceremonies"],
+      languages: ["Sanskrit", "Hindi", "English"],
+      experience: "Minimum 5 years in conducting similar pujas",
+      estimatedCost: "$100-300 depending on complexity"
+    },
+    preparation: [
+      "Clean the puja area thoroughly",
+      "Gather all essential items",
+      "Take a purifying bath",
+      "Wear clean, preferably traditional clothes",
+      "Keep mobile phones on silent"
+    ]
   };
 };
