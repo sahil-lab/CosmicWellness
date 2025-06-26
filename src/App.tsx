@@ -31,6 +31,127 @@ import { Sparkles, Moon, Star, Heart, Crown, Volume2, AlertTriangle, Hand, LogOu
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "13214695469-rfc1tg3lftkkj9dq57js7rj5ugsinjaj.apps.googleusercontent.com";
 
+// Cosmic Background Component
+const CosmicBackground: React.FC = () => {
+  const [stars, setStars] = useState<Array<{ id: number; x: number; y: number; size: number; delay: number }>>([]);
+  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; size: number; delay: number; duration: number }>>([]);
+
+  useEffect(() => {
+    // Generate random stars
+    const generateStars = () => {
+      const starArray = [];
+      for (let i = 0; i < 150; i++) {
+        starArray.push({
+          id: i,
+          x: Math.random() * 100,
+          y: Math.random() * 100,
+          size: Math.random() * 3 + 1,
+          delay: Math.random() * 5,
+        });
+      }
+      setStars(starArray);
+    };
+
+    // Generate floating particles
+    const generateParticles = () => {
+      const particleArray = [];
+      for (let i = 0; i < 50; i++) {
+        particleArray.push({
+          id: i,
+          x: Math.random() * 100,
+          y: Math.random() * 100,
+          size: Math.random() * 8 + 2,
+          delay: Math.random() * 10,
+          duration: Math.random() * 20 + 10,
+        });
+      }
+      setParticles(particleArray);
+    };
+
+    generateStars();
+    generateParticles();
+  }, []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {/* Animated Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950 animate-pulse-slow"></div>
+
+      {/* Secondary Gradient Layer */}
+      <div className="absolute inset-0 bg-gradient-to-tl from-blue-950/50 via-violet-950/50 to-fuchsia-950/50 animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+      {/* Nebula Clouds */}
+      <div className="absolute top-0 left-0 w-full h-full">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-purple-500/30 via-pink-500/20 to-transparent rounded-full filter blur-3xl animate-float opacity-70"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gradient-radial from-cyan-500/30 via-blue-500/20 to-transparent rounded-full filter blur-3xl animate-float-reverse opacity-60" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-radial from-indigo-500/30 via-violet-500/20 to-transparent rounded-full filter blur-3xl animate-pulse-slow opacity-50" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-3/4 left-1/6 w-72 h-72 bg-gradient-radial from-emerald-500/25 via-teal-500/15 to-transparent rounded-full filter blur-3xl animate-float opacity-40" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute bottom-1/4 left-3/4 w-56 h-56 bg-gradient-radial from-orange-500/25 via-red-500/15 to-transparent rounded-full filter blur-3xl animate-bounce-slow opacity-50" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      {/* Twinkling Stars */}
+      <div className="absolute inset-0">
+        {stars.map((star) => (
+          <div
+            key={star.id}
+            className="absolute rounded-full bg-white animate-twinkle"
+            style={{
+              left: `${star.x}%`,
+              top: `${star.y}%`,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              animationDelay: `${star.delay}s`,
+              boxShadow: '0 0 6px rgba(255, 255, 255, 0.8)',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Floating Cosmic Particles */}
+      <div className="absolute inset-0">
+        {particles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute rounded-full bg-gradient-to-r from-cyan-400 to-purple-400 opacity-30 filter blur-sm"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+            }}
+            animate={{
+              y: [0, -50, 0],
+              x: [0, 25, -25, 0],
+              scale: [1, 1.2, 0.8, 1],
+              opacity: [0.3, 0.7, 0.3],
+            }}
+            transition={{
+              duration: particle.duration,
+              delay: particle.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Galaxy Spiral Effect */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-screen h-screen">
+        <div className="absolute inset-0 bg-gradient-conic from-transparent via-purple-500/10 via-pink-500/10 via-blue-500/10 to-transparent animate-spin-slow opacity-30"></div>
+      </div>
+
+      {/* Aurora-like Waves */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-1/2 left-0 w-full h-full bg-gradient-to-b from-green-400/20 via-transparent to-transparent transform rotate-12 animate-wave opacity-40"></div>
+        <div className="absolute -bottom-1/2 right-0 w-full h-full bg-gradient-to-t from-purple-400/20 via-transparent to-transparent transform -rotate-12 animate-wave-reverse opacity-40" style={{ animationDelay: '3s' }}></div>
+      </div>
+
+      {/* Cosmic Dust Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent animate-pulse-slow opacity-20"></div>
+    </div>
+  );
+};
+
 // Main App Component
 const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
   const navigate = useNavigate();
@@ -122,7 +243,7 @@ const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
                 animate={{ opacity: 1, y: 0 }}
                 className="max-w-2xl mx-auto"
               >
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 shadow-2xl">
                   <h3 className="text-xl font-bold text-white mb-4">
                     Tell us more about what you're experiencing
                   </h3>
@@ -160,13 +281,9 @@ const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cosmic-900 via-cosmic-800 to-mystical-900 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-mystical-500/20 rounded-full filter blur-3xl animate-pulse-slow"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-golden-500/20 rounded-full filter blur-3xl animate-float"></div>
-        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-cosmic-500/20 rounded-full filter blur-3xl animate-pulse-slow"></div>
-      </div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Cosmic Background */}
+      <CosmicBackground />
 
       {/* Navigation */}
       <nav className="relative z-10 p-6">
@@ -177,8 +294,13 @@ const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-2"
             >
-              <Sparkles className="w-8 h-8 text-mystical-400" />
-              <h1 className="text-2xl font-bold text-white">Cosmic Wellness</h1>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkles className="w-8 h-8 text-mystical-400 drop-shadow-lg" />
+              </motion.div>
+              <h1 className="text-2xl font-bold text-white drop-shadow-lg">Cosmic Wellness</h1>
             </motion.div>
 
             {/* User Menu */}
@@ -191,7 +313,7 @@ const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
                   </div>
                   <button
                     onClick={handleSignOut}
-                    className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-cosmic-200 hover:text-white"
+                    className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-cosmic-200 hover:text-white backdrop-blur-sm"
                   >
                     <LogOut className="w-4 h-4" />
                     <span className="hidden md:inline">Sign Out</span>
@@ -201,13 +323,13 @@ const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => navigate('/login')}
-                    className="px-4 py-2 text-cosmic-200 hover:text-white transition-colors"
+                    className="px-4 py-2 text-cosmic-200 hover:text-white transition-colors backdrop-blur-sm rounded-lg hover:bg-white/10"
                   >
                     Sign In
                   </button>
                   <button
                     onClick={() => navigate('/register')}
-                    className="px-4 py-2 bg-gradient-to-r from-golden-500 to-mystical-500 text-white rounded-lg hover:from-golden-600 hover:to-mystical-600 transition-all"
+                    className="px-4 py-2 bg-gradient-to-r from-golden-500 to-mystical-500 text-white rounded-lg hover:from-golden-600 hover:to-mystical-600 transition-all backdrop-blur-sm shadow-lg"
                   >
                     Sign Up
                   </button>
@@ -233,7 +355,7 @@ const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
             ].map(({ id, icon: Icon, label, requiresAuth }) => (
               <motion.button
                 key={id}
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   if (requiresAuth && !user) {
@@ -242,9 +364,9 @@ const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
                     setActiveSection(id as any);
                   }
                 }}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-300 text-sm ${activeSection === id
-                  ? 'bg-mystical-500 text-white'
-                  : 'bg-white/10 text-cosmic-200 hover:bg-white/20'
+                className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-300 text-sm backdrop-blur-sm shadow-lg ${activeSection === id
+                  ? 'bg-mystical-500 text-white shadow-mystical-500/25'
+                  : 'bg-white/10 text-cosmic-200 hover:bg-white/20 hover:text-white'
                   } ${requiresAuth && !user ? 'opacity-75' : ''}`}
               >
                 <Icon className="w-4 h-4" />
@@ -264,7 +386,7 @@ const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 text-center py-8 text-cosmic-300 text-sm">
+      <footer className="relative z-10 text-center py-8 text-cosmic-300 text-sm backdrop-blur-sm">
         <p>© 2025 Cosmic Wellness. Transforming lives through AI-powered healing frequencies.</p>
       </footer>
 
@@ -309,13 +431,48 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cosmic-900 via-mystical-900 to-golden-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Star className="w-8 h-8 text-golden-400 animate-spin" />
-            <Sparkles className="w-8 h-8 text-mystical-400 animate-pulse" />
-          </div>
-          <p className="text-white text-lg">Loading your cosmic journey...</p>
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+        <CosmicBackground />
+        <div className="relative z-10 text-center">
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center justify-center gap-4 mb-6"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            >
+              <Star className="w-12 h-12 text-golden-400 drop-shadow-lg" />
+            </motion.div>
+            <motion.div
+              animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Sparkles className="w-12 h-12 text-mystical-400 drop-shadow-lg" />
+            </motion.div>
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            >
+              <Moon className="w-12 h-12 text-cosmic-400 drop-shadow-lg" />
+            </motion.div>
+          </motion.div>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-white text-xl font-semibold drop-shadow-lg cosmic-glow"
+          >
+            Loading your cosmic journey...
+          </motion.p>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: "100%" }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="mt-4 h-1 bg-gradient-to-r from-golden-400 via-mystical-400 to-cosmic-400 rounded-full mx-auto max-w-xs"
+          />
         </div>
       </div>
     );

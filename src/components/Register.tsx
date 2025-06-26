@@ -107,11 +107,20 @@ const Register: React.FC = () => {
 
     return (
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-            <div className="min-h-screen bg-gradient-to-br from-cosmic-900 via-mystical-900 to-golden-900 flex items-center justify-center p-4">
+            <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+                {/* Cosmic Background */}
+                <div className="absolute inset-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950"></div>
+                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-purple-500/30 via-pink-500/20 to-transparent rounded-full filter blur-3xl animate-float opacity-70"></div>
+                    <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gradient-radial from-cyan-500/30 via-blue-500/20 to-transparent rounded-full filter blur-3xl animate-float-reverse opacity-60"></div>
+                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-radial from-indigo-500/30 via-violet-500/20 to-transparent rounded-full filter blur-3xl animate-pulse-slow opacity-50"></div>
+                </div>
+
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full max-w-md"
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.6 }}
+                    className="w-full max-w-md relative z-10"
                 >
                     <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 shadow-2xl">
                         {/* Header */}
