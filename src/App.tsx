@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { auth, db } from './config/firebase';
@@ -33,6 +33,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "13214695469-r
 
 // Main App Component
 const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
+  const navigate = useNavigate();
   const [selectedEmotion, setSelectedEmotion] = useState<Emotion | null>(null);
   const [problem, setProblem] = useState('');
   const [videos, setVideos] = useState<VideoRecommendation[]>([]);
@@ -198,18 +199,18 @@ const MainApp: React.FC<{ user: User | null }> = ({ user }) => {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <a
-                    href="/login"
+                  <button
+                    onClick={() => navigate('/login')}
                     className="px-4 py-2 text-cosmic-200 hover:text-white transition-colors"
                   >
                     Sign In
-                  </a>
-                  <a
-                    href="/register"
+                  </button>
+                  <button
+                    onClick={() => navigate('/register')}
                     className="px-4 py-2 bg-gradient-to-r from-golden-500 to-mystical-500 text-white rounded-lg hover:from-golden-600 hover:to-mystical-600 transition-all"
                   >
                     Sign Up
-                  </a>
+                  </button>
                 </div>
               )}
             </div>
