@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
@@ -24,6 +24,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import PrivateRoute from './components/PrivateRoute';
 import SubscriptionModal from './components/SubscriptionModal';
+import ThreeCosmicBackground from './components/ThreeCosmicBackground';
 
 import { getVideoRecommendations } from './services/aiService';
 import { Emotion, VideoRecommendation } from './types';
@@ -31,124 +32,93 @@ import { Sparkles, Moon, Star, Heart, Crown, Volume2, AlertTriangle, Hand, LogOu
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "13214695469-rfc1tg3lftkkj9dq57js7rj5ugsinjaj.apps.googleusercontent.com";
 
-// Cosmic Background Component
-const CosmicBackground: React.FC = () => {
+// CSS Fallback Background for when Three.js fails or on low-end devices
+const FallbackBackground: React.FC = () => {
   const [stars, setStars] = useState<Array<{ id: number; x: number; y: number; size: number; delay: number }>>([]);
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; size: number; delay: number; duration: number }>>([]);
 
   useEffect(() => {
-    // Generate random stars
     const generateStars = () => {
       const starArray = [];
-      for (let i = 0; i < 150; i++) {
+      for (let i = 0; i < 100; i++) { // Reduced for fallback
         starArray.push({
           id: i,
           x: Math.random() * 100,
           y: Math.random() * 100,
-          size: Math.random() * 3 + 1,
-          delay: Math.random() * 5,
+          size: Math.random() * 2 + 1,
+          delay: Math.random() * 3,
         });
       }
       setStars(starArray);
     };
-
-    // Generate floating particles
-    const generateParticles = () => {
-      const particleArray = [];
-      for (let i = 0; i < 50; i++) {
-        particleArray.push({
-          id: i,
-          x: Math.random() * 100,
-          y: Math.random() * 100,
-          size: Math.random() * 8 + 2,
-          delay: Math.random() * 10,
-          duration: Math.random() * 20 + 10,
-        });
-      }
-      setParticles(particleArray);
-    };
-
     generateStars();
-    generateParticles();
   }, []);
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {/* Animated Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950 animate-pulse-slow"></div>
-
-      {/* Secondary Gradient Layer */}
-      <div className="absolute inset-0 bg-gradient-to-tl from-blue-950/50 via-violet-950/50 to-fuchsia-950/50 animate-pulse" style={{ animationDelay: '2s' }}></div>
-
-      {/* Nebula Clouds */}
-      <div className="absolute top-0 left-0 w-full h-full">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-purple-500/30 via-pink-500/20 to-transparent rounded-full filter blur-3xl animate-float opacity-70"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gradient-radial from-cyan-500/30 via-blue-500/20 to-transparent rounded-full filter blur-3xl animate-float-reverse opacity-60" style={{ animationDelay: '3s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-radial from-indigo-500/30 via-violet-500/20 to-transparent rounded-full filter blur-3xl animate-pulse-slow opacity-50" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-3/4 left-1/6 w-72 h-72 bg-gradient-radial from-emerald-500/25 via-teal-500/15 to-transparent rounded-full filter blur-3xl animate-float opacity-40" style={{ animationDelay: '4s' }}></div>
-        <div className="absolute bottom-1/4 left-3/4 w-56 h-56 bg-gradient-radial from-orange-500/25 via-red-500/15 to-transparent rounded-full filter blur-3xl animate-bounce-slow opacity-50" style={{ animationDelay: '2s' }}></div>
-      </div>
-
-      {/* Twinkling Stars */}
-      <div className="absolute inset-0">
-        {stars.map((star) => (
-          <div
-            key={star.id}
-            className="absolute rounded-full bg-white animate-twinkle"
-            style={{
-              left: `${star.x}%`,
-              top: `${star.y}%`,
-              width: `${star.size}px`,
-              height: `${star.size}px`,
-              animationDelay: `${star.delay}s`,
-              boxShadow: '0 0 6px rgba(255, 255, 255, 0.8)',
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Floating Cosmic Particles */}
-      <div className="absolute inset-0">
-        {particles.map((particle) => (
-          <motion.div
-            key={particle.id}
-            className="absolute rounded-full bg-gradient-to-r from-cyan-400 to-purple-400 opacity-30 filter blur-sm"
-            style={{
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-              width: `${particle.size}px`,
-              height: `${particle.size}px`,
-            }}
-            animate={{
-              y: [0, -50, 0],
-              x: [0, 25, -25, 0],
-              scale: [1, 1.2, 0.8, 1],
-              opacity: [0.3, 0.7, 0.3],
-            }}
-            transition={{
-              duration: particle.duration,
-              delay: particle.delay,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Galaxy Spiral Effect */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-screen h-screen">
-        <div className="absolute inset-0 bg-gradient-conic from-transparent via-purple-500/10 via-pink-500/10 via-blue-500/10 to-transparent animate-spin-slow opacity-30"></div>
-      </div>
-
-      {/* Aurora-like Waves */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 left-0 w-full h-full bg-gradient-to-b from-green-400/20 via-transparent to-transparent transform rotate-12 animate-wave opacity-40"></div>
-        <div className="absolute -bottom-1/2 right-0 w-full h-full bg-gradient-to-t from-purple-400/20 via-transparent to-transparent transform -rotate-12 animate-wave-reverse opacity-40" style={{ animationDelay: '3s' }}></div>
-      </div>
-
-      {/* Cosmic Dust Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent animate-pulse-slow opacity-20"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950"></div>
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-purple-500/20 via-pink-500/10 to-transparent rounded-full filter blur-3xl animate-float opacity-60"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gradient-radial from-cyan-500/20 via-blue-500/10 to-transparent rounded-full filter blur-3xl animate-float-reverse opacity-50"></div>
+      {stars.map((star) => (
+        <div
+          key={star.id}
+          className="absolute rounded-full bg-white animate-twinkle"
+          style={{
+            left: `${star.x}%`,
+            top: `${star.y}%`,
+            width: `${star.size}px`,
+            height: `${star.size}px`,
+            animationDelay: `${star.delay}s`,
+            boxShadow: '0 0 4px rgba(255, 255, 255, 0.6)',
+          }}
+        />
+      ))}
     </div>
+  );
+};
+
+// Enhanced Cosmic Background with Three.js and fallback
+const CosmicBackground: React.FC = () => {
+  const [useThreeJS, setUseThreeJS] = useState(true);
+  const [isLowEnd, setIsLowEnd] = useState(false);
+
+  useEffect(() => {
+    // Check device capabilities
+    const checkPerformance = () => {
+      const isMobile = window.innerWidth < 768;
+      const isLowEndDevice = navigator.hardwareConcurrency < 4;
+      const hasWebGL = (() => {
+        try {
+          const canvas = document.createElement('canvas');
+          return !!(window.WebGLRenderingContext && canvas.getContext('webgl'));
+        } catch (e) {
+          return false;
+        }
+      })();
+
+      if (!hasWebGL || (isMobile && isLowEndDevice)) {
+        setUseThreeJS(false);
+        setIsLowEnd(true);
+      }
+    };
+
+    checkPerformance();
+  }, []);
+
+  const handleThreeJSError = () => {
+    console.warn('Three.js failed to load, falling back to CSS animations');
+    setUseThreeJS(false);
+  };
+
+  if (!useThreeJS || isLowEnd) {
+    return <FallbackBackground />;
+  }
+
+  return (
+    <Suspense fallback={<FallbackBackground />}>
+      <div onError={handleThreeJSError}>
+        <ThreeCosmicBackground onFallback={() => setUseThreeJS(false)} />
+      </div>
+    </Suspense>
   );
 };
 
@@ -432,7 +402,9 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
-        <CosmicBackground />
+        <Suspense fallback={<FallbackBackground />}>
+          <CosmicBackground />
+        </Suspense>
         <div className="relative z-10 text-center">
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
